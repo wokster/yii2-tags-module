@@ -18,14 +18,22 @@ use yii\helpers\ArrayHelper;
 
 class TagsBehavior extends Behavior
 {
-
   public $new_tags = [];
+
+  public function attach($owner)
+  {
+    parent::attach($owner);
+    $validator = \yii\validators\Validator::createValidator('safe', $owner, 'new_tags');
+    $owner->validators[] = $validator;
+  }
 
   public function events()
   {
     return [
         ActiveRecord::EVENT_BEFORE_DELETE => 'deleteTags',
-        ActiveRecord::EVENT_AFTER_FIND => 'deleteTags',
+        ActiveRecord::EVENT_AFTER_FIND => 'tagsToArray',
+        ActiveRecord::EVENT_AFTER_INSERT => 'saveTag',
+        ActiveRecord::EVENT_AFTER_UPDATE => 'saveTag',
     ];
   }
 
@@ -39,18 +47,18 @@ class TagsBehavior extends Behavior
   }
 
   public function getTags(){
-    return $this->hasMany(Tags::className(),['id'=>'tag_id'])->via('tagRalation');
+    return $this->owner->hasMany(Tags::className(),['id'=>'tag_id'])->via('tagRalation');
   }
 
   public function tagsToArray()
   {
-    $this->new_tags = \yii\helpers\ArrayHelper::map($this->tags,'name','name');
+    $this->new_tags = \yii\helpers\ArrayHelper::map($this->getTags()->all(),'name','name');
   }
 
   public function saveTag()
   {
     if(is_array($this->new_tags)){
-      $old_tags = ArrayHelper::map($this->tags,'name','id');
+      $old_tags = ArrayHelper::map($this->owner->tags,'name','id');
       foreach ($this->new_tags as $one_new_tag){
         if(isset($old_tags[$one_new_tag])){
           unset($old_tags[$one_new_tag]);
