@@ -45,4 +45,8 @@ class TagsRelation extends \yii\db\ActiveRecord
             'related_item' => 'related_item',
         ];
     }
+
+    public function getTags(){
+        return $this->hasOne(Tags::className(),['id'=>'tag_id']);
+    }
 }

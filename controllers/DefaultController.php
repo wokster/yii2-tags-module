@@ -4,10 +4,6 @@ namespace wokster\tags\controllers;
 
 use yii;
 use yii\web\Controller;
-use wokster\seomodule\models\Seo;
-use wokster\seomodule\models\SeoSearch;
-use yii\web\NotFoundHttpException;
-use yii\filters\VerbFilter;
 
 /**
  * Default controller for the `tags` module
@@ -26,7 +22,7 @@ class DefaultController extends Controller
       \Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
       $out = ['results' => ['id' => '', 'text' => '']];
       if (!is_null($q)) {
-        $query = new Query();
+        $query = new yii\db\Query();
         $query->select('id, name AS text')
             ->from('tags')
             ->andWhere(['like','name',$q])
